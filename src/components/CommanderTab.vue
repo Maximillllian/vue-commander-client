@@ -9,17 +9,16 @@
         <path-bread-crumbs :path="formatedPath" @open-folder="loadFolder"/>
         <form class="path-input-form">
           <label for="path-input">Введите путь: </label>
-          <input v-model="inputPath" type="text" name="path-input" id="path-input" :placeholder="drives[0].path">
+          <input @input="hideError" v-model="inputPath" type="text" name="path-input" id="path-input" :placeholder="drives[0].path">
           <button @click.prevent="loadFolder(inputPath)">Перейти</button>
         </form>
+        <div class="error" :hidden="!pathNotExist">Такого пути нет</div>
       </div>
-      <div class="error" :hidden="!pathNotExist">Такого пути нет</div>
       <hr />
     </header>
     <main>
       <files-table
-        :files="files"
-        :root="isRoot"
+        :folder="folder"
         :is-path="isPath"
         @back="backToParentFolder"
         @open-folder="addToPath"
@@ -27,7 +26,7 @@
       />
     </main>
     <footer>
-      <p>Блабла</p>
+      <control-panel />
     </footer>
   </div>
 </template>
@@ -43,17 +42,19 @@ import {
 import CommanderTabDrives from "./CommanderTabDrives.vue";
 import FilesTable from "./FilesTable.vue";
 import PathBreadCrumbs from './PathBreadCrumbs.vue'
+import ControlPanel from './ControlPanel.vue'
 
 export default {
   components: {
     CommanderTabDrives,
     FilesTable,
-    PathBreadCrumbs
+    PathBreadCrumbs,
+    ControlPanel
   },
 
   data() {
     return {
-      files: [],
+      folder: [],
       path: "",
       inputPath: '',
       drives: [],
@@ -76,19 +77,6 @@ export default {
       return this.path.replace("\\\\", "\\");
     },
 
-    isRoot() {
-      if (!this.path) {
-        return true;
-      }
-      const pathSectionsLength = this.formatedPath
-        .split("\\")
-        .filter(Boolean).length;
-      if (this.formatedPath.startsWith("\\")) {
-        return pathSectionsLength === 0;
-      }
-      return pathSectionsLength === 1;
-    },
-
     isPath() {
       return Boolean(this.path);
     },
@@ -105,8 +93,8 @@ export default {
 
     async loadFolder(path) {
       try {
-        this.pathNotExist = false
-        this.files = await getFilseFromFolder(path);
+        this.hideError()
+        this.folder = await getFilseFromFolder(path);
         this.path = path
       } catch (err) {
         this.pathNotExist = true
@@ -125,6 +113,10 @@ export default {
     async loadDrives() {
       this.drives = await getDrives();
     },
+
+    hideError() {
+      this.pathNotExist = false
+    }
   },
 };
 </script>
@@ -166,6 +158,9 @@ export default {
 }
 
 .error {
-  color: red;
+  padding: .5rem;
+  border: 1px solid red;
+  background-color: rgb(240, 150, 150);
+  color: rgb(182, 6, 6);
 }
 </style>

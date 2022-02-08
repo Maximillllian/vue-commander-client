@@ -10,7 +10,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr class="back" :disabled="root" @click="back">
+      <tr class="back" :disabled="folder.isRoot || !isPath" @dblclick="back">
         <td><span class="material-icons-outlined"> arrow_back </span></td>
         <td class="message">Вернуться назад</td>
       </tr>
@@ -23,10 +23,11 @@
 
       <template v-else>
         <tr
-          :class="{ selected: file === selectedFile }"
-          v-for="file in files"
+          :class="{ selected: selectedFiles.includes(file) }"
+          v-for="file in folder.filesData"
           :key="file.name"
-          @click="openFolder(file)"
+          @dblclick="openFolder(file)"
+          @click="selectFile($event, file)"
         >
           <td><file-icon :type="file.type" /></td>
           <td>
@@ -34,12 +35,14 @@
           </td>
           <td>
             <span>
-              <template v-if="file.is_directory">&lt;ПАПКА&gt;</template>
-              <template v-if="file.is_file">{{ file.extension }}</template>
+              {{ file.extension }}
             </span>
           </td>
           <td>
-            <span>{{ file.size }}</span>
+            <span>
+              <template v-if="file.is_directory">&lt;ПАПКА&gt;</template>
+              <template v-if="file.is_file">{{ formatBytes(file.size) }}</template>
+            </span>
           </td>
           <td>
             <span>{{ formatDate(file.last_modified) }}</span>
@@ -59,18 +62,12 @@ export default {
   },
 
   props: {
-    files: {
-      type: Array,
+    folder: {
+      type: Object,
       required: true,
       default() {
-        return [];
+        return {};
       },
-    },
-
-    root: {
-      type: Boolean,
-      required: false,
-      default: false,
     },
 
     isPath: {
@@ -82,13 +79,13 @@ export default {
 
   data() {
     return {
-      selectedFile: null,
+      selectedFiles: [],
     };
   },
 
   computed: {
     isFilesExists() {
-      return Boolean(this.files.length);
+      return Boolean(this.folder.filesData.length);
     },
   },
 
@@ -109,8 +106,24 @@ export default {
       return formatedDate;
     },
 
-    selectFile(file) {
-      this.selectedFile = file;
+    formatBytes(bytes, decimals = 2) {
+      if (!bytes) return "0 байт";
+
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ["байт", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+    },
+
+    selectFile(event, file) {
+      if (event.ctrlKey) {
+        this.selectedFiles.push(file)
+      } else {
+        this.selectedFiles = [file];
+      }
     },
 
     back() {
