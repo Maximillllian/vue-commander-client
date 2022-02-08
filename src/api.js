@@ -6,7 +6,7 @@ export function getDrives() {
     return axios.get('/drives').then(res => res.data)
 }
 
-export function getFilseFromFolder(path) {
+export function getFilesFromFolder(path) {
     return axios.post('/open-folder', { path }).then(res => res.data)
 }
 
@@ -16,4 +16,8 @@ export function openFileNative(path) {
 
 export function getParentFolderPath(path) {
     return axios.post('/back', { path }).then(res => res.data)
+}
+
+export function deleteFiles(paths) {
+    return axios.post('/delete', { paths }).then(res => res.data)
 }

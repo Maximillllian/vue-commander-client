@@ -20,23 +20,25 @@
       <files-table
         :folder="folder"
         :is-path="isPath"
+        @select-files="selectFiles"
         @back="backToParentFolder"
-        @open-folder="addToPath"
+        @open-folder="changePath"
         @open-file="openFile"
       />
     </main>
     <footer>
-      <control-panel />
+      <control-panel @delete="deleteFiles" />
     </footer>
   </div>
 </template>
 
 <script>
 import {
-  getFilseFromFolder,
+  getFilesFromFolder,
   openFileNative,
   getParentFolderPath,
   getDrives,
+  deleteFiles
 } from "../api";
 
 import CommanderTabDrives from "./CommanderTabDrives.vue";
@@ -55,7 +57,8 @@ export default {
   data() {
     return {
       folder: [],
-      path: "",
+      path: "D:\\\\test",
+      selectedFiles: [],
       inputPath: '',
       drives: [],
       pathNotExist: false
@@ -87,14 +90,14 @@ export default {
       this.path = path;
     },
 
-    addToPath(name) {
-      this.path += `\\${name}`;
+    selectFiles(files) {
+      this.selectedFiles = files
     },
 
     async loadFolder(path) {
       try {
         this.hideError()
-        this.folder = await getFilseFromFolder(path);
+        this.folder = await getFilesFromFolder(path);
         this.path = path
       } catch (err) {
         this.pathNotExist = true
@@ -102,8 +105,13 @@ export default {
       }
     },
 
-    async openFile(name) {
-      await openFileNative(`${this.path}\\${name}`);
+    async reloadFolder() {
+      console.log('Ща перезагрузим')
+      this.folder = await getFilesFromFolder(this.path)
+    },
+
+    async openFile(path) {
+      await openFileNative(path);
     },
 
     async backToParentFolder() {
@@ -116,6 +124,11 @@ export default {
 
     hideError() {
       this.pathNotExist = false
+    },
+
+    async deleteFiles() {
+      await deleteFiles(this.selectedFiles.flatMap(file => file.path))
+      this.reloadFolder()
     }
   },
 };

@@ -92,9 +92,9 @@ export default {
   methods: {
     openFolder(file) {
       if (file.is_directory) {
-        this.$emit("open-folder", file.name);
+        this.$emit("open-folder", file.path);
       } else if (file.is_file) {
-        this.$emit("open-file", file.name);
+        this.$emit("open-file", file.path);
       }
     },
 
@@ -119,11 +119,15 @@ export default {
     },
 
     selectFile(event, file) {
-      if (event.ctrlKey) {
+      if (this.selectedFiles.includes(file)) {
+        const idx = this.selectedFiles.indexOf(file)
+        this.selectedFiles.splice(idx, 1)
+      } else if (event.ctrlKey) {
         this.selectedFiles.push(file)
       } else {
         this.selectedFiles = [file];
       }
+      this.$emit('select-files', this.selectedFiles)
     },
 
     back() {
