@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import axios from './plugins/axios'
 import './assets/css/normalize.css'
+import './assets/css/style.css'
 import 'material-icons/iconfont/material-icons.css';
 
 Vue.config.productionTip = false

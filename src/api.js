@@ -9,3 +9,11 @@ export function getDrives() {
 export function getFilseFromFolder(path) {
     return axios.post('/open-folder', { path }).then(res => res.data)
 }
+
+export function openFileNative(path) {
+    return axios.post('/open-file-native', { path }).then(res => res.data)
+}
+
+export function getParentFolderPath(path) {
+    return axios.post('/back', { path }).then(res => res.data)
+}

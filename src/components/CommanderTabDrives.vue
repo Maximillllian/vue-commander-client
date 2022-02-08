@@ -1,41 +1,40 @@
 <template>
-  <div>
-      <div class="drives">
-          <button v-for="drive in drives" :key="drive.path" @click="openFolder(drive.path)">{{ drive.path }}</button>
-      </div>
-  </div>
+    <div class="drives">
+      Диски:
+      <button
+        v-for="drive in drives"
+        :key="drive.path"
+        @click="changeDrive(drive.path)"
+      >
+        {{ drive.path }}
+      </button>
+    </div>
 </template>
 
 <script>
-import { getDrives, getFilseFromFolder } from "../api";
-
 export default {
-  data() {
-    return {
-      drives: {},
-    };
-  },
-
-  created() {
-    this.loadDrives();
+  props: {
+      drives: {
+          type: Array,
+          default() {
+              return []
+          }
+      }
   },
 
   methods: {
-    async loadDrives() {
-      this.drives = await getDrives();
+    async changeDrive(path) {
+      this.$emit("change-directory", path);
     },
-
-    async openFolder(path) {
-        const files = await getFilseFromFolder(path)
-        this.$emit('change-directory', files, path)
-    }
   },
 };
 </script>
 
 <style lang="scss" scoped>
 .drives {
-    display: flex;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+//   padding: .5rem;
 }
 </style>
