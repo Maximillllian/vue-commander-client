@@ -1,13 +1,9 @@
 <template>
     <div class="drives">
       Диски:
-      <button
-        v-for="drive in drives"
-        :key="drive.path"
-        @click="changeDrive(drive.path)"
-      >
-        {{ drive.path }}
-      </button>
+      <select name="" v-model="selectedDrive">
+        <option v-for="drive in drives" :key="drive.path" :value="drive">{{ drive.path }}</option>
+      </select>
     </div>
 </template>
 
@@ -20,6 +16,22 @@ export default {
               return []
           }
       }
+  },
+
+  watch: {
+    selectedDrive() {
+      this.changeDrive(this.selectedDrive.path)
+    }
+  },
+
+  data() {
+    return {
+      selectedDrive: null
+    }
+  },
+
+  created() {
+    this.selectedDrive = this.drives[0]
   },
 
   methods: {

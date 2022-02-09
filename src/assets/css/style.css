@@ -5,3 +5,11 @@
 input::placeholder {
     color: rgb(211, 208, 208)
 }
+
+.error {
+    padding: .5rem;
+    border: 1px solid red;
+    background-color: rgb(240, 150, 150);
+    color: rgb(182, 6, 6);
+    margin-top: .5rem;
+  }
