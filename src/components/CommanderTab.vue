@@ -28,6 +28,7 @@
         @copy="handleCopyFiles"
         @move="handleMoveFiles"
         @rename="handleRenameFile"
+        @reload="reloadFolder"
       />
     </footer>
     <input-popup ref="choosePathPopup">
