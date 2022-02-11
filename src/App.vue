@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <main>
-      <commander-tab />
-      <commander-tab />
+      <commander-tab @change-path="setFirstTabPath" />
+      <commander-tab @change-path="setSecondTabPath" />
     </main>
   </div>
 </template>
@@ -14,6 +14,24 @@ export default {
   name: 'App',
   components: {
     CommanderTab
+  },
+
+  data() {
+    return {
+      firstTabPath: '',
+      secondTabPath: '',
+      reload: false
+    }
+  },
+
+  methods: {
+    setFirstTabPath(path) {
+      this.firstTabPath = path
+    },
+
+    setSecondTabPath(path) {
+      this.secondTabPath = path
+    },
   }
 }
 </script>

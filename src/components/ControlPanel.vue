@@ -3,6 +3,7 @@
         <button @click.prevent="deleteFiles">Удалить</button>
         <button @click.prevent="copyFiles">Скопировать</button>
         <button @click.prevent="moveFiles">Переместить</button>
+        <button @click.prevent="renameFile">Переименовать</button>
     </form>
 </template>
 
@@ -19,6 +20,10 @@ export default {
 
         moveFiles() {
             this.$emit('move')
+        },
+
+        renameFile() {
+            this.$emit('rename')
         }
     }
 }

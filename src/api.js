@@ -48,3 +48,7 @@ export function moveFiles(sourcePaths, pathToCopy) {
     const files = createFilesListWithSourceAndDestinationPaths(sourcePaths, pathToCopy)
     return axios.post('/move', { files }).then(res => res.data)
 }
+
+export function renameFile(sourcePath, newName) {
+    return axios.post('/rename', { sourcePath, newName }).then(res => res.data)
+}

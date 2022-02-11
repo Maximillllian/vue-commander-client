@@ -4,7 +4,11 @@
       <div class="content">
         <commander-tab-drives :drives="drives" @change-directory="loadFolder" />
         <path-bread-crumbs :path="formatedPath" @open-folder="loadFolder" />
-        <search-path-input @search="loadFolder" :placeholder="drives[0].path" :error.sync="pathNotExist" />
+        <search-path-input
+          @search="loadFolder"
+          :placeholder="firstDrivePath"
+          :error.sync="pathNotExist"
+        />
       </div>
       <hr />
     </header>
@@ -23,9 +27,17 @@
         @delete="handleDeleteFiles"
         @copy="handleCopyFiles"
         @move="handleMoveFiles"
+        @rename="handleRenameFile"
       />
     </footer>
-    <choose-path-popup ref="choosePathPopup" />
+    <input-popup ref="choosePathPopup">
+      <template #title>Выберите, куда переместить/скопировать файлы</template>
+      <template #description>Выберите путь</template>
+    </input-popup>
+    <input-popup ref="renamePopup">
+      <template #title>Выберите новое название</template>
+      <template #description>Новое название:</template>
+    </input-popup>
     <delete-confirmation-popup ref="deletePopup" />
   </div>
 </template>
@@ -39,15 +51,16 @@ import {
   deleteFiles,
   copyFiles,
   moveFiles,
+  renameFile,
 } from "../api";
 
 import CommanderTabDrives from "./CommanderTabDrives.vue";
 import FilesTable from "./FilesTable.vue";
 import PathBreadCrumbs from "./PathBreadCrumbs.vue";
 import ControlPanel from "./ControlPanel.vue";
-import ChoosePathPopup from "./ChoosePathPopup.vue";
-import DeleteConfirmationPopup from './DeleteConfirmationPopup.vue'
-import SearchPathInput from './SearchPathInput.vue'
+import InputPopup from "./InputPopup.vue";
+import DeleteConfirmationPopup from "./DeleteConfirmationPopup.vue";
+import SearchPathInput from "./SearchPathInput.vue";
 
 export default {
   components: {
@@ -55,14 +68,14 @@ export default {
     FilesTable,
     PathBreadCrumbs,
     ControlPanel,
-    ChoosePathPopup,
+    InputPopup,
     DeleteConfirmationPopup,
-    SearchPathInput
+    SearchPathInput,
   },
 
   data() {
     return {
-      folder: [],
+      folder: {},
       path: "",
       selectedFiles: [],
       drives: [],
@@ -70,13 +83,14 @@ export default {
     };
   },
 
-  async mounted() {
+  mounted() {
     this.loadDrives();
   },
 
   watch: {
     path() {
       this.loadFolder(this.path);
+      this.$emit("change-path", this.path);
     },
   },
 
@@ -94,8 +108,15 @@ export default {
     },
 
     isSelectedFilesExist() {
-      return Boolean(this.selectedFiles.length)
-    }
+      return Boolean(this.selectedFiles.length);
+    },
+
+    firstDrivePath() {
+      if (this.drives) {
+        return this.drives[0]?.path;
+      }
+      return "\\";
+    },
   },
 
   methods: {
@@ -111,10 +132,9 @@ export default {
       try {
         this.hideError();
         this.folder = await getFilesFromFolder(path);
-        this.path = path;
+        this.changePath(path);
       } catch (err) {
         this.pathNotExist = true;
-        console.log(err);
       }
     },
 
@@ -143,6 +163,11 @@ export default {
       return popupResult;
     },
 
+    async openRenamePopup() {
+      const popupResult = await this.$refs.renamePopup.open();
+      return popupResult;
+    },
+
     async openDeletePopup() {
       const popupResult = await this.$refs.deletePopup.open();
       return popupResult;
@@ -150,14 +175,18 @@ export default {
 
     async handleDeleteFiles() {
       if (this.isSelectedFilesExist) {
-        const deleteConfirmation = await this.openDeletePopup()
+        const deleteConfirmation = await this.openDeletePopup();
         if (deleteConfirmation) {
-          await deleteFiles(this.selectedFilesPaths);
-          this.reloadFolder();
-          alert('Файлы успешно удалены :)')
+          try {
+            await deleteFiles(this.selectedFilesPaths);
+            this.reloadFolder();
+            alert("Файлы успешно удалены :)");
+          } catch (err) {
+            alert(err.response.data.message);
+          }
         }
       } else {
-        alert('Выберите файлы для удаления')
+        alert("Выберите файлы для удаления");
       }
     },
 
@@ -169,11 +198,11 @@ export default {
             await copyFiles(this.selectedFilesPaths, destinationPath);
             alert("Файлы успешно скопированы :)");
           } catch (err) {
-            alert("Произошла ошибка при копировании!");
+            alert(err.response.data.message);
           }
         }
       } else {
-        alert('Выберите файлы для копирования')
+        alert("Выберите файлы для копирования");
       }
     },
 
@@ -186,11 +215,28 @@ export default {
             this.reloadFolder();
             alert("Файлы успешно перемещены :)");
           } catch (err) {
-            alert("Произошла ошибка при перемещении!");
+            alert(err.response.data.message);
           }
         }
       } else {
-        alert('Выберите файлы для перемещения')
+        alert("Выберите файлы для перемещения");
+      }
+    },
+
+    async handleRenameFile() {
+      if (this.selectedFiles.length !== 1) {
+        alert("Пожауйста, выберите 1 файл");
+      } else {
+        const newName = await this.openRenamePopup();
+        if (newName) {
+          try {
+            await renameFile(this.selectedFilesPaths[0], newName);
+            this.reloadFolder();
+            alert("Файл успешно переименован");
+          } catch (err) {
+            alert(err.response.data.message);
+          }
+        }
       }
     },
   },

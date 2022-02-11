@@ -1,11 +1,11 @@
 <template>
   <app-popup ref="popup">
-    <template #title>Выберите, куда переместить/скопировать файлы</template>
+    <template #title><slot name="title"></slot></template>
     <template #body>
       <form>
         <div class="form-item">
           <label for="path">Введите путь:</label>
-          <input v-model="path" type="text" name="path" id="path" />
+          <input v-model="path" type="text" name="path" id="path" :placeholder="placeholder"/>
         </div>
       </form>
       <div v-if="showError" class="error">Пожалуйста, введите путь</div>
@@ -26,17 +26,18 @@ export default {
   components: {
     AppPopup,
   },
+
   props: {
-    action: {
+    placeholder: {
       type: String,
-      required: false,
-      default: "copy",
-    },
+      default: ''
+    }
   },
 
   data() {
       return {
-          showError: false
+          showError: false,
+          path: ''
       }
   },
 
@@ -64,5 +65,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
+.form-item {
+  display: flex;
+  gap: .5rem;
+}
 </style>
