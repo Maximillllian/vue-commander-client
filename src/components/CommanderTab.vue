@@ -53,14 +53,14 @@ import {
   copyFiles,
   moveFiles,
   renameFile,
-} from "../api";
+} from "../api/api";
 
 import CommanderTabDrives from "./CommanderTabDrives.vue";
-import FilesTable from "./FilesTable.vue";
+import FilesTable from "./FilesTable/FilesTable.vue";
 import PathBreadCrumbs from "./PathBreadCrumbs.vue";
 import ControlPanel from "./ControlPanel.vue";
-import InputPopup from "./InputPopup.vue";
-import DeleteConfirmationPopup from "./DeleteConfirmationPopup.vue";
+import InputPopup from "./UI/InputPopup.vue";
+import DeleteConfirmationPopup from "./UI/DeleteConfirmationPopup.vue";
 import SearchPathInput from "./SearchPathInput.vue";
 
 export default {
